@@ -3,37 +3,30 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Rules\ProcessedOTPAndPhone;
+use App\User;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
 
 class LoginController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Login Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
-    |
-    */
+   public function __invoke(Request $request)
+   {
+       $data = $request->validate([
+           'phone' => ['required', 'exists:users'],
+           'otp' => ['required', new ProcessedOTPAndPhone($request)]
+       ]);
 
-    use AuthenticatesUsers;
+       $user = User::where('phone', $data['phone'])->first();
 
-    /**
-     * Where to redirect users after login.
-     *
-     * @var string
-     */
-    protected $redirectTo = '/home';
+       $token = auth()->login($user);
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('guest')->except('logout');
-    }
+       return response()->json([
+           'message' => 'Logon successful.',
+           'data' => [
+               'access_token' => $token,
+               'expires_in' => auth()->factory()->getTTL() * 60
+           ]
+       ]);
+   }
 }

@@ -1,7 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Route;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -13,6 +12,6 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::prefix('v1')->group( function () {
+    require_once "api_v1/api.php";
 });

@@ -2,71 +2,88 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
+use App\Rules\UnregisteredPhone;
+use App\Rules\ProcessedOTPAndPhone;
+use App\TemporaryUser;
 use App\User;
-use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
+use Propaganistas\LaravelPhone\PhoneNumber;
 
-class RegisterController extends Controller
+class RegisterController
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Register Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles the registration of new users as well as their
-    | validation and creation. By default this controller uses a trait to
-    | provide this functionality without requiring any additional code.
-    |
-    */
 
-    use RegistersUsers;
-
-    /**
-     * Where to redirect users after registration.
-     *
-     * @var string
-     */
-    protected $redirectTo = '/home';
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
+    public function __invoke(Request $request)
     {
-        $this->middleware('guest');
+       $data = $request->validate([
+           'phone' => ['required', 'phone:NG', new UnregisteredPhone],
+           'first_name' => ['required', 'string'],
+           'last_name' => ['required', 'string'],
+           'email' => ['nullable', 'email', 'unique:users'],
+           'otp' => ['required', new ProcessedOTPAndPhone($request)]
+       ]);
+
+        DB::beginTransaction();
+       try {
+
+           $data['phone'] = $this->formatPhoneNumber($data['phone']);
+
+           $temp_user = TemporaryUser::where('phone', $data['phone'])->first();
+
+           $user = $this->createUser($data, $temp_user);
+
+            $token = $this->createToken($user);
+
+            if (!$token) {
+                return response()->json(['message' => 'An error was encountered.'], 501);
+            }
+
+            $temp_user->delete();
+
+           DB::commit();
+
+           return response()->json([
+               'message' => 'Account has been created.',
+               'data' => [
+                    'access_token' => $token,
+                   'expires_in' => auth()->factory()->getTTL() * 60,
+               ]
+           ], 201);
+
+       } catch (\Exception $e) {
+
+           DB::rollBack();
+
+           $message = "========== ERROR ON ACCOUNT CREATION ========== \n";
+           $message .= $e->getMessage() . "\n" . $e->getTraceAsString();
+           Log::critical($message);
+
+
+           return response()->json(['message' => 'An Error was encountered. Try Again'], 501);
+       }
     }
 
-    /**
-     * Get a validator for an incoming registration request.
-     *
-     * @param  array  $data
-     * @return \Illuminate\Contracts\Validation\Validator
-     */
-    protected function validator(array $data)
+    private function createUser(array $data, $temp_user)
     {
-        return Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
+        $data['otp'] = Hash::make($temp_user->otp);
+        $data['role'] = 'user';
+
+        return User::create($data);
     }
 
-    /**
-     * Create a new user instance after a valid registration.
-     *
-     * @param  array  $data
-     * @return \App\User
-     */
-    protected function create(array $data)
+    private function createToken(User $user)
     {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
+        return auth()->login($user);
+    }
+
+    private function formatPhoneNumber(string $phone)
+    {
+        // This will format the phone number with a leading +
+        $formatted_number = PhoneNumber::make($phone)->ofCountry('NG');
+
+        // remove the +
+        return str_replace('+', '', $formatted_number);
     }
 }
