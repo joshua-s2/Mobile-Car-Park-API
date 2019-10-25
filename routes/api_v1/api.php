@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
  */
 
 Route::prefix('auth')->namespace('Auth')->group(function () {
-    Route::post('send-otp', 'OTPController@getOTP');
+    Route::post('send-otp', 'OTPController@sendOTP');
     Route::post('verify-otp', 'OTPController@verifyOTP');
     Route::post('register', 'RegisterController');
 

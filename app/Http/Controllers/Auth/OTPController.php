@@ -4,34 +4,33 @@
 namespace App\Http\Controllers\Auth;
 
 
+use App\Classes\Helper;
 use App\Rules\ProcessedOTPAndPhone;
+use App\Rules\RegisteredPhonNumber;
 use App\TemporaryUser;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Propaganistas\LaravelPhone\PhoneNumber;
 
 class OTPController
 {
 
-    public function getOTP(Request $request)
+    public function sendOTP(Request $request)
     {
+        if ($request->has('login')) {
+            return $this->generateOPPForLogin($request);
+        }
+
         $data = $request->validate([
             'phone' => ['required', 'string', 'min:11', 'phone:NG']
         ]);
 
 
         try {
-            $data['otp'] = random_int(1000, 9999);
-        } catch (\Exception $e) {
-            $data['otp'] = rand(1000, 9999);
-        }
-        // TODO Send ana SMS to the phone number
-        // for now we'll use a static OTP
-        $data['otp'] = 1234;
-
-        try {
             // Format phone number
-            $data['phone'] = $this->formatPhoneNumber($data['phone']);
+            $data['phone'] = Helper::formatPhoneNumber($data['phone']);
+
+            $data['otp'] = $this->generateAndSendOTP($data['phone']);
 
             TemporaryUser::updateOrCreate(['phone' => $data['phone']], ['otp' => $data['otp']]);
 
@@ -58,12 +57,41 @@ class OTPController
         return response()->json(['message' => 'OTP verified.']);
     }
 
-    private function formatPhoneNumber(string $phone)
-    {
-        // This will format the phone number with a leading +
-        $formatted_number = PhoneNumber::make($phone)->ofCountry('NG');
 
-        // remove the +
-        return str_replace('+', '', $formatted_number);
+    private function generateOPPForLogin(Request $request)
+    {
+        $request->validate([
+            'phone' => ['required', 'string', new RegisteredPhonNumber]
+        ]);
+
+        $phone = Helper::formatPhoneNumber($request->phone);
+
+        DB::beginTransaction();
+        try {
+            $otp = $this->generateAndSendOTP($phone);
+
+            // Save the OTP
+            TemporaryUser::query()->updateOrCreate(['phone' => $phone], ['otp' => $otp]);
+
+            return response()->json(['message' => 'An OTP has been sent to your phone number.']);
+        } catch (\Exception $e) {
+            Log::critical("========== Error Sending OTP ========== \n" . $e->getMessage() . "\n" . $e->getTraceAsString());
+
+            return response()->json(['message' => "An error was encountered."], 501);
+        }
+    }
+
+    private function generateAndSendOTP(string $phone)
+    {
+        try {
+           $otp =  random_int(1000, 9999);
+        } catch (\Exception $e) {
+           $otp = rand(1000, 9999);
+        }
+        // TODO Send ana SMS to the phone number
+        // for now we'll use a static OTP
+        $otp = 1234;
+
+        return $otp;
     }
 }
