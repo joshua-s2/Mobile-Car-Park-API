@@ -1,4 +1,5 @@
 ##Setup Guide
+
 Ensure that you have PHP >+7.2 MYSQL and  [composer](https://getcomposer.org/)
 installed in your machine
 
