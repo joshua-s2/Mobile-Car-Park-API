@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\API\Auth;
 
+use App\Classes\Helper;
 use App\Rules\UnregisteredPhone;
 use App\Rules\ProcessedOTPAndPhone;
 use App\TemporaryUser;
@@ -80,10 +81,6 @@ class RegisterController
 
     private function formatPhoneNumber(string $phone)
     {
-        // This will format the phone number with a leading +
-        $formatted_number = PhoneNumber::make($phone)->ofCountry('NG');
-
-        // remove the +
-        return str_replace('+', '', $formatted_number);
+        return Helper::formatPhoneNumber($phone);
     }
 }

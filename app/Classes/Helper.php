@@ -4,6 +4,7 @@
 namespace App\Classes;
 
 
+use Illuminate\Support\Facades\Log;
 use Propaganistas\LaravelPhone\PhoneNumber;
 
 class Helper
@@ -15,5 +16,10 @@ class Helper
 
         // remove the +
         return str_replace('+', '', $formatted_number);
+    }
+
+    public static function logException(\Exception $e, string $title = '')
+    {
+        Log::critical("========== {$title} ========== \n" . $e->getMessage() . "\n" . $e->getTraceAsString());
     }
 }

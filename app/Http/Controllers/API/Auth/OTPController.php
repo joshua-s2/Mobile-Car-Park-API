@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\API\Auth;
 
 
 use App\Classes\Helper;
@@ -25,7 +25,7 @@ class OTPController
             'phone' => ['required', 'string', 'min:11', 'phone:NG']
         ]);
 
-
+        DB::beginTransaction();
         try {
             // Format phone number
             $data['phone'] = Helper::formatPhoneNumber($data['phone']);
@@ -34,8 +34,11 @@ class OTPController
 
             TemporaryUser::updateOrCreate(['phone' => $data['phone']], ['otp' => $data['otp']]);
 
+            DB::commit();
+
             return response()->json(['message' => 'An OTP has been snt to your phone number.']);
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::critical("========== ERROR SENDING OTP ========== \n" . $e->getMessage() . "\n" . $e->getTraceAsString());
 
             return response()->json(['message' => 'An error was encountered. Try again'], 501);
@@ -73,8 +76,11 @@ class OTPController
             // Save the OTP
             TemporaryUser::query()->updateOrCreate(['phone' => $phone], ['otp' => $otp]);
 
+            DB::commit();
+
             return response()->json(['message' => 'An OTP has been sent to your phone number.']);
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::critical("========== Error Sending OTP ========== \n" . $e->getMessage() . "\n" . $e->getTraceAsString());
 
             return response()->json(['message' => "An error was encountered."], 501);

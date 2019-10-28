@@ -11,10 +11,10 @@ Route::prefix('auth')->namespace('Auth')->group(function () {
     Route::post('verify-otp', 'OTPController@verifyOTP');
     Route::post('register', 'RegisterController');
 
-
     Route::post('login', 'LoginController');
+});
 
-    Route::get('user', function () {
-        return auth()->user();
-    })->middleware('auth');
+Route::prefix('user')->middleware('auth')->group( function () {
+    Route::get('/', 'UserProfileController@show');
+    Route::patch('/', 'UserProfileController@update');
 });
