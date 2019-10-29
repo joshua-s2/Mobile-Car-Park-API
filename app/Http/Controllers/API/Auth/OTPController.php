@@ -7,6 +7,7 @@ namespace App\Http\Controllers\API\Auth;
 use App\Classes\Helper;
 use App\Rules\ProcessedOTPAndPhone;
 use App\Rules\RegisteredPhonNumber;
+use App\Rules\UnregisteredPhone;
 use App\TemporaryUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +23,7 @@ class OTPController
         }
 
         $data = $request->validate([
-            'phone' => ['required', 'string', 'min:11', 'phone:NG']
+            'phone' => ['required', 'string', 'min:11', 'phone:NG', new UnregisteredPhone]
         ]);
 
         DB::beginTransaction();
