@@ -13,8 +13,10 @@ class CarPark extends Model
      */
     protected $fillable = [
     	'name',
-    	'location',
-    	'image',
+    	'owner',
+    	'address',
+    	'tel',
     	'fee'
+    	'image_link',
     ];
 }
