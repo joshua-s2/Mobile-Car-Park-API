@@ -21,6 +21,7 @@ class CreateCarParksTable extends Migration
             $table->string('tel', 15);
             $table->bigInteger('fee');
             $table->string('image_link')->nullable();
+            $table->boolean('status')->default(1);
             $table->timestamps();
         });
     }
