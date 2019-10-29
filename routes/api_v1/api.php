@@ -18,3 +18,7 @@ Route::prefix('user')->middleware('auth')->group( function () {
     Route::get('/', 'UserProfileController@show');
     Route::patch('/', 'UserProfileController@update');
 });
+
+Route::prefix('park')->group(function () {
+	Route::post('/', 'CarParkController@store');
+});
