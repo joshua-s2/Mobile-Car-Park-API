@@ -18,5 +18,6 @@ class CarPark extends Model
     	'tel',
     	'fee'
     	'image_link',
+    	'status'
     ];
 }
