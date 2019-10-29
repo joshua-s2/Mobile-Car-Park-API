@@ -30,11 +30,11 @@ class UserProfileController
             'phone' => ['required', 'phone:NG', Rule::unique('users')->ignore($this->user->id)],
             'first_name' => ['required', 'string', 'min:3', 'max:255'],
             'last_name' => ['required', 'string', 'min:3', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255', Rule::unique('users')->ignore($this->user->id)],
         ]);
 
         try {
-            $this->user->updated($data);
+            $this->user->update($data);
 
             return response()->json(['message' => 'Profile updated', 'data' => $data]);
         } catch (\Exception $e) {
