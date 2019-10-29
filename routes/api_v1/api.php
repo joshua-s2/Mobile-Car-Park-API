@@ -20,5 +20,5 @@ Route::prefix('user')->middleware('auth')->group( function () {
 });
 
 Route::prefix('park')->group(function () {
-	Route::put('/', 'CarParkController@store');
+	Route::post('/', 'CarParkController@store');
 });
