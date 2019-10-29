@@ -19,6 +19,13 @@ Route::prefix('user')->middleware('auth')->group( function () {
     Route::patch('/', 'UserProfileController@update');
 });
 
+Route::prefix('vehicles')->middleware('auth')->group( function () {
+    Route::get('/', 'VehiclesController@index');
+    Route::post('/', 'VehiclesController@store');
+    Route::patch('{id}', 'VehiclesController@update');
+    Route::delete('{id}', 'VehiclesController@delete');
+});
+
 Route::prefix('park')->group(function () {
 	Route::post('/', 'CarParkController@store');
 });
