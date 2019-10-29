@@ -116,7 +116,7 @@ class VehiclesController
         }
         // if this is chosen to be the main ride, then
         // any revert main ride status in any other record
-        $other_main_rides = $this->user->where('main_ride', true)->get();
+        $other_main_rides = $this->user->vehicles()->where('main_ride', true)->get();
 
         if ($other_main_rides->isEmpty()) {
             return;
