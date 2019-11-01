@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use App\TemporaryUser;
+use App\OTP;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Http\Request;
 use Propaganistas\LaravelPhone\PhoneNumber;
@@ -32,7 +32,7 @@ class ProcessedOTPAndPhone implements Rule
     public function passes($attribute, $value)
     {
         $phone = $this->formantNumber($this->phone);
-        return TemporaryUser::where('phone', $phone)->where('otp', $value)->exists();
+        return OTP::where('phone', $phone)->where('otp', $value)->exists();
     }
 
     /**

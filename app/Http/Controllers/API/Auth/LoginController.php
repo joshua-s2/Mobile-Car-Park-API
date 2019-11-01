@@ -6,7 +6,7 @@ use App\Classes\Helper;
 use App\Http\Controllers\Controller;
 use App\Rules\ProcessedOTPAndPhone;
 use App\Rules\RegisteredPhonNumber;
-use App\TemporaryUser;
+use App\OTP;
 use App\User;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
@@ -30,7 +30,7 @@ class LoginController extends Controller
            return response()->json(['message' => 'An error ws encountered.'], 500);
        }
 
-       $temp_user = TemporaryUser::where('phone', $data['phone'])->first();
+       $temp_user = OTP::where('phone', $data['phone'])->first();
 
        $temp_user->delete();
 

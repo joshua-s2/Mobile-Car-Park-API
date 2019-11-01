@@ -5,8 +5,9 @@ namespace App\Http\Controllers\API\Auth;
 use App\Classes\Helper;
 use App\Rules\UnregisteredPhone;
 use App\Rules\ProcessedOTPAndPhone;
-use App\TemporaryUser;
+use App\OTP;
 use App\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -29,11 +30,11 @@ class RegisterController
         DB::beginTransaction();
        try {
 
-           $data['phone'] = $this->formatPhoneNumber($data['phone']);
+            $data['phone'] = $this->formatPhoneNumber($data['phone']);
 
-           $temp_user = TemporaryUser::where('phone', $data['phone'])->first();
+            $temp_user = OTP::where('phone', $data['phone'])->first();
 
-           $user = $this->createUser($data, $temp_user);
+            $user = $this->createUser($data);
 
             $token = $this->createToken($user);
 
@@ -42,6 +43,8 @@ class RegisterController
             }
 
             $temp_user->delete();
+
+           event(new Registered($user));
 
            DB::commit();
 
@@ -66,9 +69,8 @@ class RegisterController
        }
     }
 
-    private function createUser(array $data, $temp_user)
+    private function createUser(array $data)
     {
-        $data['otp'] = Hash::make($temp_user->otp);
         $data['role'] = 'user';
 
         return User::create($data);

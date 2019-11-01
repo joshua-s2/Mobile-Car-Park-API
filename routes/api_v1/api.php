@@ -16,13 +16,14 @@ Route::prefix('auth')->namespace('Auth')->group(function () {
 
 Route::prefix('user')->middleware('auth')->group( function () {
     Route::get('/', 'UserProfileController@show');
-    Route::patch('/', 'UserProfileController@update');
+    Route::put('/', 'UserProfileController@update');
+    Route::patch('/settings', 'UserProfileController@manageProfile');
 });
 
 Route::prefix('vehicles')->middleware('auth')->group( function () {
     Route::get('/', 'VehiclesController@index');
     Route::post('/', 'VehiclesController@store');
-    Route::patch('{id}', 'VehiclesController@update');
+    Route::put('{id}', 'VehiclesController@update');
     Route::delete('{id}', 'VehiclesController@delete');
 });
 

@@ -8,7 +8,7 @@ use App\Classes\Helper;
 use App\Rules\ProcessedOTPAndPhone;
 use App\Rules\RegisteredPhonNumber;
 use App\Rules\UnregisteredPhone;
-use App\TemporaryUser;
+use App\OTP;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -33,7 +33,7 @@ class OTPController
 
             $data['otp'] = $this->generateAndSendOTP($data['phone']);
 
-            TemporaryUser::updateOrCreate(['phone' => $data['phone']], ['otp' => $data['otp']]);
+            OTP::updateOrCreate(['phone' => $data['phone']], ['otp' => $data['otp']]);
 
             DB::commit();
 
@@ -75,7 +75,7 @@ class OTPController
             $otp = $this->generateAndSendOTP($phone);
 
             // Save the OTP
-            TemporaryUser::query()->updateOrCreate(['phone' => $phone], ['otp' => $otp]);
+            OTP::query()->updateOrCreate(['phone' => $phone], ['otp' => $otp]);
 
             DB::commit();
 
