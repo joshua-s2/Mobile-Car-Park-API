@@ -27,8 +27,15 @@ Route::prefix('vehicles')->middleware('auth')->group( function () {
     Route::delete('{id}', 'VehiclesController@delete');
 });
 
-Route::prefix('park')->group(function () {
-	Route::get('/', 'CarParkController@index');
-	Route::post('/', 'CarParkController@store');
-	Route::put('/{id}', 'CarParkController@update');
+Route::group(['prefix' => 'park', 'middleware' => 'auth'], function () {
+	Route::get('/', 'CarParkController@apiIndex');
+    Route::get('all', 'CarParkController@index');
+    Route::get('{id}', 'CarParkController@show');
+
+    Route::group(['middleware' => 'admin'], function () {
+        Route::get('active', 'CarParkController@showActive');
+        Route::get('inactive', 'CarParkController@showInActive');
+    	Route::post('/', 'CarParkController@store');
+    	Route::patch('{id}', 'CarParkController@update');
+    });
 });

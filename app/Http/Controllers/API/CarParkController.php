@@ -39,12 +39,12 @@ class CarParkController extends Controller
     ){
         // Validate posted data
         $this->validate($request, [
-            'name'        => ['required', 'regex:/^([a-zA-Z]+)(\s[a-zA-Z]+)*$/'],
-            'owner'       => ['required', 'string',],
-            'address'     => ['required', 'string',],
-            'phone'       => ['required', 'string', 'min:11', 'phone:NG'],
-            'fee'         => ['required', 'integer', 'min:0'],
-            'image_link'  => ['string', 'nullable']
+            'name'        => ['bail', 'required', 'regex:/^([a-zA-Z]+)(\s[a-zA-Z]+)*$/'],
+            'owner'       => ['bail', 'required', 'string',],
+            'address'     => ['bail', 'required', 'string',],
+            'phone'       => ['bail', 'required', 'string', 'min:11', 'phone:NG'],
+            'fee'         => ['bail', 'required', 'integer', 'min:0'],
+            'image_link'  => ['bail', 'string', 'nullable']
         ]);
 
         $park->name       = $request->name;
@@ -59,7 +59,7 @@ class CarParkController extends Controller
             return response()->json([
                 'status'  => true,
                 'result'  => $park,
-                'message' => 'Car update was successfully added'
+                'message' => 'The parking space was successfully added'
             ], 200);
         }
         else {
@@ -83,23 +83,24 @@ class CarParkController extends Controller
         // Get the intended resource
         $update = $update->find($id);
 
+
         // Proceed to update if record exists
         if (!is_null($update)) {
             // Validate posted data
             $this->validate($request, [
-                'name'       => ['regex:/^([a-zA-Z]+)(\s[a-zA-Z]+)*$/'],
-                'owner'      => 'string',
-                'address'    => 'string',
-                'phone'      => ['string', 'min:11', 'phone:NG'],
-                'fee'        => ['integer', 'min:0'],
-                'image_link' => ['string', 'nullable'],
-                'status'     => ['integet',],
+                'name'        => ['regex:/^([a-zA-Z]+)(\s[a-zA-Z]+)*$/'],
+                'owner'       => ['string',],
+                'address'     => ['string',],
+                'phone'       => ['string', 'min:11', 'phone:NG'],
+                'fee'         => ['integer', 'min:0'],
+                'status'      => ['integer'],
+                'image_link'  => ['string', 'nullable']
             ]);
 
             $update->name       = $request->name ?? $update->name;
             $update->owner      = $request->owner ?? $update->owner;
             $update->address    = $request->address ?? $update->address;
-            $update->phone      = $request->tel ?? $update->phone;
+            $update->phone      = $request->phone ?? $update->phone;
             $update->fee        = $request->fee ?? $update->fee;
             $update->image_link = $request->image_link ?? $update->image_link;
             $update->status     = $request->status ?? $update->status;
@@ -129,6 +130,26 @@ class CarParkController extends Controller
    /**
      * Get all parking spaces
      *
+     * This method is recommended for web usage
+     * @return \Illuminate\Http\Response
+     */
+    public function apiIndex(Request $request)
+    {
+        // return the requested number of parking spaces.
+        $parking_spaces = CarPark::all();
+
+        // send response with the parking spaces details
+        return response()->json([
+            'status' => true,
+            'count'  => $parking_spaces->count(),
+            'spaces' => $parking_spaces
+        ], 200);
+    }
+
+   /**
+     * Get all parking spaces
+     *
+     * This method is recommended for api usage
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
@@ -143,6 +164,57 @@ class CarParkController extends Controller
         return response()->json([
             'status' => true,
             'spaces' => $parking_spaces
+        ], 200);
+    }
+
+    /**
+     * Get the details for a car park
+     *
+     */
+    public function show($id)
+    {
+        dd('a');
+        // Get the intended resource
+        $car_park = CarPark::find($id);    
+
+        // Output car park details
+        return response()->json([
+            'status'  => true,
+            'details' => $car_park
+        ], 200);
+    }
+
+    /**
+     * Get all active car parks
+     *
+     */
+    public function showActive()
+    {
+        // Get the intended resource
+        $car_park = CarPark::whereStatus(1)->get();
+
+        // Output car park details
+        return response()->json([
+            'count'   => $car_park->count(),
+            'status'  => true,
+            'details' => $car_park
+        ], 200);
+    }
+
+    /**
+     * Get all in-active car parks
+     *
+     */
+    public function showInActive()
+    {
+        // Get the intended resource
+        $car_park = CarPark::whereStatus(0)->get();    
+
+        // Output car park details
+        return response()->json([
+            'count'   => $car_park->count(),
+            'status'  => true,
+            'details' => $car_park
         ], 200);
     }
 }
