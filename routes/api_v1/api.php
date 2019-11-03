@@ -9,9 +9,16 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->namespace('Auth')->group(function () {
     Route::post('send-otp', 'OTPController@sendOTP');
     Route::post('verify-otp', 'OTPController@verifyOTP');
-    Route::post('register', 'RegisterController');
+    Route::prefix('register')->group( function () {
+        Route::post('admin', 'RegisterController@admin')->middleware('admin');
+        Route::post('partner', 'RegisterController@partner');
+        Route::post('user', 'RegisterController@user');
+    });
 
-    Route::post('login', 'LoginController');
+    Route::prefix('login')->group( function () {
+        Route::post('/', 'LoginController@adminAndPartner');
+        Route::post('user', 'LoginController@user');
+    });
 });
 
 Route::prefix('user')->middleware('auth')->group( function () {
