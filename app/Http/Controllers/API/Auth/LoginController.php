@@ -10,7 +10,6 @@ use App\OTP;
 use App\User;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -28,7 +27,7 @@ class LoginController extends Controller
 
        $data['phone'] = Helper::formatPhoneNumber($data['phone']);
 
-       $user = User::where('phone', $data['phone'])->where('role', 'user')->first();
+       $user = User::where('phone', $data['phone'])->first();
 
        $token = auth()->login($user);
 
