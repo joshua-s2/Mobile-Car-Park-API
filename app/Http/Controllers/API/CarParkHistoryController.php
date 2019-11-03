@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
 use App\CarPark;
 use App\CarParkHistory;
@@ -50,7 +50,7 @@ class CarParkHistoryController extends Controller
 
     	// Send the history data for consumption
         return response()->json([
-        	'status' => true
+        	'status' => true,
         	'count'	 => $user_histoy->count(),
         	'data'	 => $user_histoy,
         ], 200);

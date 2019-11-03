@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
 use Exception;
 use App\CarPark;
@@ -87,7 +87,7 @@ class CarParkBookingController extends Controller
 
             return response()->json([
                 'status'  => false,
-	            'message' => 'Unable to book parking space'
+	            'message' => 'Unable to book parking space',
                 'hint'    => $e->getMessage()
             ], 501);
 		}
