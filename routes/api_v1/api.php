@@ -43,6 +43,9 @@ Route::group(['prefix' => 'park', 'middleware' => 'auth'], function () {
         Route::get('active', 'CarParkController@showActive');
         Route::get('inactive', 'CarParkController@showInActive');
     	Route::post('/', 'CarParkController@store');
-    	Route::patch('{id}', 'CarParkController@update');
+    	Route::put('{id}', 'CarParkController@update');
     });
+
+    Route::get('/history/{id?}', 'CarParkHistoryController');
+    Route::post('/book', 'CarParkBookingController@store');
 });
