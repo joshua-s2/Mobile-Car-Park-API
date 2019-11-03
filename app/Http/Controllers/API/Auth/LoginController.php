@@ -27,7 +27,7 @@ class LoginController extends Controller
 
        $data['phone'] = Helper::formatPhoneNumber($data['phone']);
 
-       $user = User::where('phone', $data['phone'])->first();
+       $user = User::where('phone', $data['phone'])->where('role', 'user')->first();
 
        $token = auth()->login($user);
 
